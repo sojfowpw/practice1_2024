@@ -1,4 +1,4 @@
-#include "parsing_json.hpp"
+#include "header.h"
 #include "structure.hpp"
 
 enum class Commands { // существующие команды
@@ -6,30 +6,33 @@ enum class Commands { // существующие команды
     INSERT,
     DELETE,
     SELECT,
-    UNKNOWN
+    ERR
 };
 
 Commands stringToCommand(const string& str) { // определение команд
-    if (str == "EXIT") {
+    istringstream iss(str);
+    string word;
+    iss >> word;
+    if (word == "EXIT") {
         return Commands::EXIT;
     }
-    else if (str == "INSERT") {
+    else if (word == "INSERT") {
         return Commands::INSERT;
     }
-    else if (str == "DELETE") {
+    else if (word == "DELETE") {
         return Commands::DELETE;
     }
-    else if (str == "SELECT") {
+    else if (word == "SELECT") {
         return Commands::SELECT;
     }
     else {
-        cerr << "Неизвестная команда.\n";
-        return Commands::UNKNOWN;
+        return Commands::ERR;
     }
 }
 
 int main() {
-    parsing();
+    tableJson tjs;
+    parsing(tjs);
     cout << "\n\n";
     string command; // строка для команды
     while (true) {
@@ -43,7 +46,10 @@ int main() {
             case Commands::EXIT: // выход
                 return 0;
             case Commands::INSERT: // вставка
-                insert(command);
+                insert(command, tjs);
+                break;
+            case Commands::ERR:
+                cerr << "Неизвестная команда.\n";
                 break;
         }
     }
