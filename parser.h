@@ -4,7 +4,7 @@
 #include <filesystem> // директории
 #include "json.hpp" // json
 
-#include "structure.h" // структура таблиц
+#include "insert.h" // структура таблиц
 
 using namespace std;
 using json = nlohmann::json; 
