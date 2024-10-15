@@ -1,5 +1,8 @@
-#include "header.h"
-#include "structure.hpp"
+#include "parser.h"
+#include "structure.h"
+#include "parser.cpp"
+#include "insert.cpp"
+
 
 enum class Commands { // существующие команды
     EXIT,
@@ -9,8 +12,8 @@ enum class Commands { // существующие команды
     ERR
 };
 
-Commands stringToCommand(const string& str) { // определение команд
-    istringstream iss(str);
+Commands stringToCommand(const string& cmd) { // определение команд
+    istringstream iss(cmd); // поток ввода для обработки строки
     string word;
     iss >> word;
     if (word == "EXIT") {
@@ -35,7 +38,7 @@ int main() {
     parsing(tjs);
     cout << "\n\n";
     string command; // строка для команды
-    while (true) {
+    /*while (true) {
         cout << "Введите команду: ";
         getline(cin, command);
         if (command == "") { // если пустая строка
@@ -46,12 +49,17 @@ int main() {
             case Commands::EXIT: // выход
                 return 0;
             case Commands::INSERT: // вставка
-                insert(command, tjs);
+                //insert(command, tjs);
                 break;
             case Commands::ERR:
                 cerr << "Неизвестная команда.\n";
                 break;
         }
-    }
+    }*/
+    cout << isLocked("table1", tjs.schemeName) << endl;
+    locker("table1", tjs.schemeName);
+    cout << isLocked("table1", tjs.schemeName) << endl;
+    locker("table1", tjs.schemeName);
+    cout << isLocked("table1", tjs.schemeName) << endl;
     return 0;
 }
