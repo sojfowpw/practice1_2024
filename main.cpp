@@ -1,7 +1,10 @@
 #include "parser.h"
 #include "insert.h"
+#include "delete.h"
+
 #include "parser.cpp"
 #include "insert.cpp"
+#include "delete.cpp"
 
 
 enum class Commands { // существующие команды
@@ -50,6 +53,9 @@ int main() {
                 return 0;
             case Commands::INSERT: // вставка
                 insert(command, tjs);
+                break;
+            case Commands::DELETE: // удаление
+                del(command, tjs);
                 break;
             case Commands::ERR:
                 cerr << "Неизвестная команда.\n";
