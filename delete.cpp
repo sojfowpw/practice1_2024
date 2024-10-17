@@ -1,24 +1,19 @@
 #include "delete.h"
 
-bool isColumnExist(const string& tableName, const string& columnName, tableJson& tjs) { // поиск колонки
-    string filePath = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + tableName + "/1.csv";
-    ifstream file(filePath);
-    if (!file.is_open()) {
-        cerr << "Не удалось открыть файл.\n";
-    }
-    string columns; // строка для чтения всех колонок
-    getline(file, columns);
-    file.close();
-    string currentColumn; // текущая колонка
-    for (size_t i = 0; i < columns.size(); i++) { // перебор колонок из строки
-        if (columns[i] == ',') {
-            if (currentColumn == columnName) {
-                return true;
+bool isColumnExist(const string& tableName, const string& columnName, tNode* tableHead) { // поиск колонки
+    tNode* currentTable = tableHead; // указатель на голову структуры
+    while (currentTable) {
+        if (currentTable->table == tableName) { // ищем заданную таблицу
+            Node* currentColumn = currentTable->column; // указатель на первую колонку в искомой таблицк
+            while (currentColumn) {
+                if (currentColumn->column == columnName) { // ищем колонку
+                    return true; // если нашли
+                }
+                currentColumn = currentColumn->next;
             }
-            currentColumn = ""; // обновляем текущую строку
-            continue;
+            return false; // если колонки нет
         }
-        currentColumn += columns[i];
+        currentTable = currentTable->next;
     }
     return false;
 }
@@ -73,7 +68,7 @@ void del(const string& command, tableJson& tjs) { // удаление
         cerr << "Некорректная команда.\n";
         return;
     }
-    if (isColumnExist(tableName, column, tjs) == false) { // проверка на существование таблицы
+    if (isColumnExist(tableName, column, tjs.tablehead) == false) { // проверка на существование таблицы
         cerr << "Такой колонки нет.\n";
         return;
     }
@@ -103,6 +98,7 @@ void del(const string& command, tableJson& tjs) { // удаление
         file.close();
         amountCsv++;
     }
+    bool deletedStr = false; // для определения существования заданного значения
     for (size_t iCsv = 1; iCsv < amountCsv; iCsv++) { // просматриваем все созданные файлы csv
         string filePath = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + tableName + "/" + to_string(iCsv) + ".csv";
         rapidcsv::Document doc(filePath); // открываем файл
@@ -111,10 +107,14 @@ void del(const string& command, tableJson& tjs) { // удаление
         for (size_t i = 0; i < amountRow; ++i) { // проходимся по строкам
             if (doc.GetCell<string>(columnIndex, i) == value) { // извлекаем значение (индекс колонки, номер строки)
                 doc.RemoveRow(i); // удаляем строку
+                deletedStr = true;
                 --amountRow; // уменьшаем количество строк
                 --i;
             }
         }
         doc.Save(filePath); 
+    }
+    if (deletedStr == false) {
+        cout << "Указанное значение не найдено.\n";
     }
 }

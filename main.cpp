@@ -6,7 +6,6 @@
 #include "insert.cpp"
 #include "delete.cpp"
 
-
 enum class Commands { // существующие команды
     EXIT,
     INSERT,
