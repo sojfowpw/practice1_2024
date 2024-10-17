@@ -68,7 +68,7 @@ void del(const string& command, tableJson& tjs) { // удаление
         cerr << "Некорректная команда.\n";
         return;
     }
-    if (isColumnExist(tableName, column, tjs.tablehead) == false) { // проверка на существование таблицы
+    if (isColumnExist(tableName, column, tjs.tablehead) == false) { // проверка на существование колонки
         cerr << "Такой колонки нет.\n";
         return;
     }

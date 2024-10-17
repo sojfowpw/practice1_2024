@@ -1,10 +1,12 @@
 #include "parser.h"
 #include "insert.h"
 #include "delete.h"
+#include "select.h"
 
 #include "parser.cpp"
 #include "insert.cpp"
 #include "delete.cpp"
+#include "select.cpp"
 
 enum class Commands { // существующие команды
     EXIT,
@@ -55,6 +57,9 @@ int main() {
                 break;
             case Commands::DELETE: // удаление
                 del(command, tjs);
+                break;
+            case Commands::SELECT: // выбор
+                select(command, tjs);
                 break;
             case Commands::ERR:
                 cerr << "Неизвестная команда.\n";
