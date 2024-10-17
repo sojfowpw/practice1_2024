@@ -49,6 +49,7 @@ void del(const string& command, tableJson& tjs) { // удаление
         return;
     }
 
+
     iss2 >> word2; // таблица и колонка
     string table, column; // названия таблицы и колонки из команды
     bool dot = false; // поиск точки 
@@ -89,5 +90,31 @@ void del(const string& command, tableJson& tjs) { // удаление
     }
     for (size_t i = 1; i < word2.size() - 1; i++) { // вытаскиваем значение из кавычек
         value += word2[i];
+    }
+
+
+    int amountCsv = 1; // ищем количество созданных csv файлов
+    while (true) {
+        string filePath = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + tableName + "/" + to_string(amountCsv) + ".csv";
+        ifstream file(filePath);
+        if (!file.is_open()) { // если файл нельзя открыть, его нет
+            break;
+        }
+        file.close();
+        amountCsv++;
+    }
+    for (size_t iCsv = 1; iCsv < amountCsv; iCsv++) { // просматриваем все созданные файлы csv
+        string filePath = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + tableName + "/" + to_string(iCsv) + ".csv";
+        rapidcsv::Document doc(filePath); // открываем файл
+        int columnIndex = doc.GetColumnIdx(column); // считываем индекс искомой колонки
+        size_t amountRow = doc.GetRowCount(); // считываем количество строк в файле
+        for (size_t i = 0; i < amountRow; ++i) { // проходимся по строкам
+            if (doc.GetCell<string>(columnIndex, i) == value) { // извлекаем значение (индекс колонки, номер строки)
+                doc.RemoveRow(i); // удаляем строку
+                --amountRow; // уменьшаем количество строк
+                --i;
+            }
+        }
+        doc.Save(filePath); 
     }
 }
