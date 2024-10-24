@@ -87,6 +87,11 @@ void del(const string& command, tableJson& tjs) { // удаление
         value += word2[i];
     }
 
+    if (isLocked(tableName, tjs.schemeName) == true) { // проверяем, доступна ли таблица для работы
+        cerr << "Таблица заблокирована.\n";
+        return;
+    }
+    locker(tableName, tjs.schemeName); // блокируем таблицу для удаления
 
     int amountCsv = 1; // ищем количество созданных csv файлов
     while (true) {
@@ -117,4 +122,5 @@ void del(const string& command, tableJson& tjs) { // удаление
     if (deletedStr == false) {
         cout << "Указанное значение не найдено.\n";
     }
+    locker(tableName, tjs.schemeName); // разблокировка
 }
