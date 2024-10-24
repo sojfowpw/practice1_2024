@@ -31,7 +31,27 @@ void splitDot(const string& word, string& table, string& column, tableJson& tjs)
     }
 }
 
-int countCsv(tableJson& tjs, string table) {
+string ignoreQuotes(const string& word) {
+    string slovo;
+    for (size_t i = 0; i < word.size(); i++) {
+        if (word[i] != '\'') {
+            slovo += word[i];
+        }
+    }
+    return slovo;
+}
+
+bool findDot(const string& word) {
+    bool dot = false;
+    for (size_t i = 0; i < word[i]; i++) {
+        if (word[i] == '.') {
+            dot = true;
+        }
+    }
+    return dot;
+}
+
+int countCsv(tableJson& tjs, const string& table) {
     int amountCsv = 1; // ищем количество созданных csv файлов
     while (true) {
         string filePath = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table + "/" + to_string(amountCsv) + ".csv";
@@ -43,6 +63,91 @@ int countCsv(tableJson& tjs, string table) {
         amountCsv++;
     }
     return amountCsv;
+}
+
+void crossJoin(tableJson& tjs, const string& table1, const string& table2, const string& column1, const string& column2) {
+    int amountCsv1 = countCsv(tjs, table1);
+    int amountCsv2 = countCsv(tjs, table2);
+    for (size_t iCsv1 = 1; iCsv1 < amountCsv1; iCsv1++) {
+        string filePath1 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table1 + "/" + to_string(iCsv1) + ".csv";
+        rapidcsv::Document doc1(filePath1); // открываем файл
+        int columnIndex1 = doc1.GetColumnIdx(column1); // считываем индекс искомой колонки
+        size_t amountRow1 = doc1.GetRowCount(); // считываем количество строк в файле
+        for (size_t i = 0; i < amountRow1; ++i) { // проходимся по строкам
+            for (size_t iCsv2 = 1; iCsv2 < amountCsv2; iCsv2++) {
+                string filePath2 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table2 + "/" + to_string(iCsv2) + ".csv";
+                rapidcsv::Document doc2(filePath2); // открываем файл
+                int columnIndex2 = doc2.GetColumnIdx(column2); // считываем индекс искомой колонки
+                size_t amountRow2 = doc2.GetRowCount(); // считываем количество строк в файле
+                for (size_t j = 0; j < amountRow2; ++j) {
+                    cout << doc1.GetCell<string>(0, i) << ": ";
+                    cout << doc1.GetCell<string>(columnIndex1, i) << "  |   ";
+                    cout << doc2.GetCell<string>(0, j) << ": ";
+                    cout << doc2.GetCell<string>(columnIndex2, j) << endl;
+                }
+            }
+        }
+    }
+}
+
+bool checkCond(tableJson& tjs, const string& table, const string& column, const string& tcond, const string& ccond, const string& s) {
+    if (s != "") {
+        int amountCsv = countCsv(tjs, table);
+        for (size_t iCsv = 1; iCsv < amountCsv; iCsv++) { // просматриваем все созданные файлы csv
+            string filePath = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table + "/" + to_string(iCsv) + ".csv";
+            rapidcsv::Document doc(filePath); // открываем файл
+            int columnIndex = doc.GetColumnIdx(column); // считываем индекс искомой колонки
+            size_t amountRow = doc.GetRowCount(); // считываем количество строк в файле
+            for (size_t i = 0; i < amountRow; ++i) { // проходимся по строкам
+                if (doc.GetCell<string>(columnIndex, i) == s) { // извлекаем значение (индекс колонки, номер строки)
+                    return true;
+                }
+            }
+        }
+    }
+    else {
+        bool condition = true;
+        int amountCsv = countCsv(tjs, table);
+        for (size_t iCsv = 1; iCsv < amountCsv; iCsv++) {
+            string pk1, pk2;
+            string pk1Path = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table + "/" + table + "_pk_sequence.txt";
+            string pk2Path = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + tcond + "/" + tcond + "_pk_sequence.txt";
+            ifstream file1(pk1Path);
+            if (!file1.is_open()) {
+                cerr << "1Не удалось открыть файл.\n";
+                return false;
+            }
+            file1 >> pk1;
+            file1.close();
+            ifstream file2(pk2Path);
+            if (!file2.is_open()) {
+                cerr << "2Не удалось открыть файл.\n";
+                return false;
+            }
+            file2 >> pk2;
+            file2.close();
+            if (pk1 != pk2) {
+                return false;
+            }
+
+            string filePath1 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table + "/" + to_string(iCsv) + ".csv";
+            string filePath2 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + tcond + "/" + to_string(iCsv) + ".csv";
+            rapidcsv::Document doc1(filePath1); // открываем файл
+            int columnIndex1 = doc1.GetColumnIdx(column); // считываем индекс искомой колонки
+            size_t amountRow1 = doc1.GetRowCount(); // считываем количество строк в файле
+            rapidcsv::Document doc2(filePath2); // открываем файл
+            int columnIndex2 = doc2.GetColumnIdx(ccond); // считываем индекс искомой колонки
+            for (size_t i = 0; i < amountRow1; ++i) { // проходимся по строкам
+                if (doc1.GetCell<string>(columnIndex1, i) != doc2.GetCell<string>(columnIndex2, i)) {
+                    condition = false;
+                }
+            }
+        }
+        if (condition) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void select(const string& command, tableJson& tjs) { // выбор данных
@@ -81,26 +186,76 @@ void select(const string& command, tableJson& tjs) { // выбор данных
         return;
     }
 
-    int amountCsv1 = countCsv(tjs, table1);
-    int amountCsv2 = countCsv(tjs, table2);
-    for (size_t iCsv1 = 1; iCsv1 < amountCsv1; iCsv1++) {
-        string filePath1 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table1 + "/" + to_string(iCsv1) + ".csv";
-        rapidcsv::Document doc1(filePath1); // открываем файл
-        int columnIndex1 = doc1.GetColumnIdx(column1); // считываем индекс искомой колонки
-        size_t amountRow1 = doc1.GetRowCount(); // считываем количество строк в файле
-        for (size_t i = 0; i < amountRow1; ++i) { // проходимся по строкам
-            for (size_t iCsv2 = 1; iCsv2 < amountCsv2; iCsv2++) {
-                string filePath2 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table2 + "/" + to_string(iCsv2) + ".csv";
-                rapidcsv::Document doc2(filePath2); // открываем файл
-                int columnIndex2 = doc2.GetColumnIdx(column2); // считываем индекс искомой колонки
-                size_t amountRow2 = doc2.GetRowCount(); // считываем количество строк в файле
-                for (size_t j = 0; j < amountRow2; ++j) {
-                    cout << doc1.GetCell<string>(0, i) << ": ";
-                    cout << doc1.GetCell<string>(columnIndex1, i) << "  |   ";
-                    cout << doc2.GetCell<string>(0, j) << ": ";
-                    cout << doc2.GetCell<string>(columnIndex2, j) << endl;
-                }
-            }
+    string thirdCmd;
+    getline(cin, thirdCmd);
+    istringstream iss3(thirdCmd);
+    iss3 >> word; // "WHERE"
+    if (word != "WHERE") {
+        crossJoin(tjs, table1, table2, column1, column2);
+        return;
+    }
+    iss3 >> word; // первая таблица и колонка
+    string t1, c1;
+    splitDot(word, t1, c1, tjs);
+    iss3 >> word; // "="
+    if (word != "=") {
+        cerr << "Некорректная команда.\n";
+        return;
+    }
+    iss3 >> word; // первое условие
+    string t1cond = "", c1cond = "", s1 = "";
+    if (findDot(word)) {
+        splitDot(word, t1cond, c1cond, tjs);
+    }
+    else {
+        s1 = ignoreQuotes(word);
+    }
+    string oper;
+    iss3 >> oper; // оператор
+    if (oper != "AND" && oper != "OR") {
+        if (checkCond(tjs, t1, c1, t1cond, c1cond, s1)) {
+            crossJoin(tjs, table1, table2, column1, column2);
+            return;
+        }
+        else {
+            cout << "Условие не выполняется.\n";
+            return;
+        }
+    }
+    iss3 >> word; // вторая таблица и колонка
+    string t2, c2;
+    splitDot(word, t2, c2, tjs);
+    iss3 >> word; // "="
+    if (word != "=") {
+        cerr << "Некорректная команда.\n";
+        return;
+    }
+    iss3 >> word; // второе условие
+    string t2cond = "", c2cond = "", s2 = "";
+    if (findDot(word)) {
+        splitDot(word, t2cond, c2cond, tjs);
+    }
+    else {
+        s1 = ignoreQuotes(word);
+    }
+    if (oper == "AND") {
+        if (checkCond(tjs, t1, c1, t1cond, c1cond, s1) == true && checkCond(tjs, t2, c2, t2cond, c2cond, s2) == true) {
+            crossJoin(tjs, table1, table2, column1, column2);
+            return;
+        }
+        else {
+            cout << "Условие не выполняется.\n";
+            return;
+        }
+    }
+    if (oper == "OR") {
+        if (checkCond(tjs, t1, c1, t1cond, c1cond, s1) == true || checkCond(tjs, t2, c2, t2cond, c2cond, s2) == true) {
+            crossJoin(tjs, table1, table2, column1, column2);
+            return;
+        }
+        else {
+            cout << "Условие не выполняется.\n";
+            return;
         }
     }
 }
