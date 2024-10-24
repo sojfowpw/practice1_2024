@@ -1,6 +1,6 @@
 #include "select.h"
 
-void splitDot(const string& word, string& table, string& column, tableJson& tjs) {
+void splitDot(const string& word, string& table, string& column, tableJson& tjs) { 
     bool dot = false; // поиск точки
     for (size_t i = 0; i < word.size(); i++) {
         if (word[i] == '.') {
@@ -31,7 +31,7 @@ void splitDot(const string& word, string& table, string& column, tableJson& tjs)
     }
 }
 
-string ignoreQuotes(const string& word) {
+string ignoreQuotes(const string& word) { // отделение от кавычек строки
     string slovo;
     for (size_t i = 0; i < word.size(); i++) {
         if (word[i] != '\'') {
@@ -41,7 +41,7 @@ string ignoreQuotes(const string& word) {
     return slovo;
 }
 
-bool findDot(const string& word) {
+bool findDot(const string& word) { // наличие точки в слове
     bool dot = false;
     for (size_t i = 0; i < word[i]; i++) {
         if (word[i] == '.') {
@@ -66,19 +66,19 @@ int countCsv(tableJson& tjs, const string& table) {
 }
 
 void crossJoin(tableJson& tjs, const string& table1, const string& table2, const string& column1, const string& column2) {
-    int amountCsv1 = countCsv(tjs, table1);
-    int amountCsv2 = countCsv(tjs, table2);
+    int amountCsv1 = countCsv(tjs, table1); // количество файлов 1 таблицы
+    int amountCsv2 = countCsv(tjs, table2); // количество файлов 2 таблицы
     for (size_t iCsv1 = 1; iCsv1 < amountCsv1; iCsv1++) {
         string filePath1 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table1 + "/" + to_string(iCsv1) + ".csv";
-        rapidcsv::Document doc1(filePath1); // открываем файл
-        int columnIndex1 = doc1.GetColumnIdx(column1); // считываем индекс искомой колонки
-        size_t amountRow1 = doc1.GetRowCount(); // считываем количество строк в файле
-        for (size_t i = 0; i < amountRow1; ++i) { // проходимся по строкам
+        rapidcsv::Document doc1(filePath1); // открываем файл 1
+        int columnIndex1 = doc1.GetColumnIdx(column1); // считываем индекс искомой колонки 1
+        size_t amountRow1 = doc1.GetRowCount(); // считываем количество строк в файле 1
+        for (size_t i = 0; i < amountRow1; ++i) { // проходимся по строкам 1
             for (size_t iCsv2 = 1; iCsv2 < amountCsv2; iCsv2++) {
                 string filePath2 = "/home/kali/Documents/GitHub/practice1_2024/" + tjs.schemeName + "/" + table2 + "/" + to_string(iCsv2) + ".csv";
-                rapidcsv::Document doc2(filePath2); // открываем файл
-                int columnIndex2 = doc2.GetColumnIdx(column2); // считываем индекс искомой колонки
-                size_t amountRow2 = doc2.GetRowCount(); // считываем количество строк в файле
+                rapidcsv::Document doc2(filePath2); // открываем файл 2
+                int columnIndex2 = doc2.GetColumnIdx(column2); // считываем индекс искомой колонки 2
+                size_t amountRow2 = doc2.GetRowCount(); // считываем количество строк в файле2
                 for (size_t j = 0; j < amountRow2; ++j) {
                     cout << doc1.GetCell<string>(0, i) << ": ";
                     cout << doc1.GetCell<string>(columnIndex1, i) << "  |   ";
@@ -186,7 +186,7 @@ void select(const string& command, tableJson& tjs) { // выбор данных
         return;
     }
 
-    string thirdCmd;
+    string thirdCmd; // третья часть команды
     getline(cin, thirdCmd);
     istringstream iss3(thirdCmd);
     iss3 >> word; // "WHERE"
